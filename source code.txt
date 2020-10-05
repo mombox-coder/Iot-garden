@@ -1,0 +1,304 @@
+###
+
+
+//Program to 
+
+
+/*=========================================================================*/
+
+/*Standard Library                                                         */
+
+/*=========================================================================*/
+
+#include <SoftwareSerial.h>
+
+#include<dht.h>
+
+
+/*=========================================================================*/
+
+/*Variable Initialization for Senor pins                                   */
+
+/*=========================================================================*/
+
+dht DHT;
+
+#define DHT11_PIN 3
+
+#define RM_1 6
+
+#define RM_2 7
+
+
+float t=0;
+
+float h=0;
+
+
+int sen_val = 0;
+
+int lig_val = 0;
+
+
+char data = 0;
+
+
+#define MOS_SEN A0
+
+#define LDR_SEN A1
+
+/*=========================================================================*/
+
+/*API key for thingspeak and change with your API                          */
+
+/*=========================================================================*/
+
+
+String apiKey = "CAM10KIK7YH2HAO0";
+
+
+/*=========================================================================*/
+
+/*Serial pins for connecting WiFi module                                   */
+
+/*=========================================================================*/
+
+SoftwareSerial ser(10,11); // RX, TX
+
+
+/*=========================================================================*/
+
+/*Setup() function that runs first                                         */
+
+/*=========================================================================*/
+
+void setup()
+
+{
+
+ Serial.begin(9600);
+
+ pinMode(MOS_SEN, INPUT);
+
+ pinMode(LDR_SEN, INPUT);
+
+ pinMode(RM_1, OUTPUT);
+
+ pinMode(RM_2, OUTPUT);
+
+   
+
+ ser.begin(9600);
+
+  
+
+ // reset ESP8266 WiFi connection AT+CIPMUX=1 AT+CWJAP
+
+/*========================================================================*/
+
+/*AT commands for establishing WiFi connection                            */
+
+/*========================================================================*/
+
+  ser.println("AT");
+
+  delay(1000);
+
+  ser.println("AT+GMR");
+
+  delay(1000);
+
+  ser.println("AT+CWMODE=3");
+
+  delay(1000);
+
+  ser.println("AT+RST");
+
+  delay(5000);
+
+  ser.println("AT+CIPMUX=1");
+
+  delay(1000);
+
+  String cmd="AT+CWJAP="EngineersGarage","egP@$$w0rd?"";
+
+  ser.println(cmd);
+
+  delay(1000);
+
+  ser.println("AT+CIFSR");
+
+  delay(1000);
+
+}
+
+
+/*========================================================================*/
+
+/*Loop functions that runs infinitely that collects sensor data           */
+
+/*========================================================================*/
+
+void loop() 
+
+{
+
+  delay(1000);
+
+  int chk = DHT.read11(DHT11_PIN);
+
+  Serial.print("Temperature = ");
+
+  t = DHT.temperature;
+
+  Serial.println(t);
+
+  Serial.print("Humidity = ");
+
+  h = DHT.humidity;
+
+  Serial.println(h);
+
+  lig_val = analogRead(LDR_SEN);
+
+  int mos_val = read_mos();
+
+  
+
+  if(mos_val > 80)
+
+  {
+
+    Serial.println("Start");
+
+    digitalWrite(RM_1, HIGH);
+
+    digitalWrite(RM_2, LOW);
+
+  }
+
+   else if(read_mos() < 80)
+
+  {
+
+      Serial.println("Stop");
+
+      digitalWrite(RM_1, LOW);
+
+      digitalWrite(RM_2, LOW);
+
+  }
+
+  Serial.println(sen_val);
+
+  delay(500);
+
+  Serial.print("Light Intensity = ");
+
+  Serial.println(lig_val);
+
+  delay(500);
+
+
+  esp_8266();
+
+}
+
+
+/*========================================================================*/
+
+/*esp8266 funtion that uploads data to web                                */
+
+/*========================================================================*/
+
+void esp_8266()
+
+{
+
+   // TCP connection AT+CIPSTART=4,"TCP","184.106.153.149",80 
+
+    String cmd = "AT+CIPSTART=4,"TCP","";
+
+    cmd += "184.106.153.149"; // api.thingspeak.com
+
+    cmd += "",80";
+
+    ser.println(cmd);
+
+    Serial.println(cmd); 
+
+    if(ser.find("Error"))
+
+    {
+
+      Serial.println("AT+CIPSTART error");
+
+      return;
+
+    }
+
+  // prepare GET string GET https://api.thingspeak.com/update?api_key=LHAG4NSIYJ5UWS6U&field1=0rnrn
+
+  String getStr = "GET /update?api_key=";
+
+  getStr += apiKey;
+
+  getStr +="&field1=";
+
+  getStr +=String(h);
+
+  getStr +="&field2=";
+
+  getStr +=String(t);
+
+  getStr +="&field3=";
+
+  getStr +=String(sen_val);
+
+  getStr +="&field4=";
+
+  getStr +=String(lig_val);
+
+  getStr += "rnrn";
+
+  
+
+  // send data length
+
+  cmd = "AT+CIPSEND=4,";
+
+  cmd += String(getStr.length());
+
+  ser.println(cmd);
+
+  Serial.println(cmd);
+
+  delay(1000);
+
+  ser.print(getStr);
+
+  Serial.println(getStr);
+
+ //thingspeak needs 15 sec delay between updates
+
+  delay(15000);
+
+}
+
+
+int read_mos()
+
+{
+
+    sen_val = analogRead(MOS_SEN);
+
+    Serial.print("Moisture = ");
+
+    sen_val = map(sen_val,0,1023,0,255);
+
+    return sen_val;
+
+}
+
+ 
+###
