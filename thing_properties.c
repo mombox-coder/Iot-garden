@@ -1,6 +1,7 @@
 #include <ArduinoIoTCloud.h>
 #include <WiFiConnectionManager.h>
-#include "arduino_secrets.h"
+#define SECRET_SSID "<SSID>"
+#define SECRET_PASS "<PSK>"
 
 const char THING_ID[] = "<thing id string here>";
 
