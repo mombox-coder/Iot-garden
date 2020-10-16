@@ -25,7 +25,7 @@ dht DHT;
 
 #define DHT11_PIN 3
 
-#define RM_1 6
+#define RM_1 6 /* actionneur */
 
 #define RM_2 7
 
@@ -54,7 +54,7 @@ char data = 0;
 /*=========================================================================*/
 
 
-String apiKey = "CAM10KIK7YH2HAO0";
+String apiKey = "CAM10KIK7YH2HAO0"; 
 
 
 /*=========================================================================*/
@@ -76,7 +76,7 @@ void setup()
 
 {
 
- Serial.begin(9600);
+ Serial.begin(9600); /* Sets the data rate in bits per second */
 
  pinMode(MOS_SEN, INPUT);
 
@@ -100,33 +100,33 @@ void setup()
 
 /*========================================================================*/
 
-  ser.println("AT");
+  ser.println("AT"); /* This command is passed to check if modem is functioning properly */
 
   delay(1000);
 
-  ser.println("AT+GMR");
+  ser.println("AT+GMR"); /* This command is passed to print the firmware version.  */
 
   delay(1000);
 
-  ser.println("AT+CWMODE=3");
+  ser.println("AT+CWMODE=3"); /*  This command is passed to set the Wi-Fi mode to both AP as well as Station mode */
 
   delay(1000);
 
-  ser.println("AT+RST");
+  ser.println("AT+RST"); /* This command is passed to reset the modem */
 
   delay(5000);
 
-  ser.println("AT+CIPMUX=1");
+  ser.println("AT+CIPMUX=1"); /* Enable / disable multiplex mode (up to 4 conenctions) */
 
   delay(1000);
 
-  String cmd="AT+CWJAP="EngineersGarage","egP@$$w0rd?"";
+  String cmd="AT+CWJAP="EngineersGarage","egP@$$w0rd?""; /* Once the modem is connected to an access point, it obtains IP address by executing the following command */
 
   ser.println(cmd);
 
   delay(1000);
 
-  ser.println("AT+CIFSR");
+  ser.println("AT+CIFSR"); /* This command is used to obtain IP address of ESP module as an client */
 
   delay(1000);
 
@@ -217,7 +217,7 @@ void esp_8266()
 
    // TCP connection AT+CIPSTART=4,"TCP","184.106.153.149",80 
 
-    String cmd = "AT+CIPSTART=4,"TCP","";
+    String cmd = "AT+CIPSTART=4,"TCP",""; /*  This command is passed to start a TCP connection with the given IP address at the specified port (80) */
 
     cmd += "184.106.153.149"; // api.thingspeak.com
 
@@ -265,7 +265,7 @@ void esp_8266()
 
   // send data length
 
-  cmd = "AT+CIPSEND=4,";
+  cmd = "AT+CIPSEND=4,"; /* This command is passed to send data at the previously mentioned IP address with the number of transmit connections set to 4 and length of data (which can be maximum 2048 bytes) specified */
 
   cmd += String(getStr.length());
 
