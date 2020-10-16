@@ -45,7 +45,7 @@ bool valveOpen;
 
 void initProperties(){
   ArduinoCloud.setThingId(THING_ID);
-  ArduinoC loud.addProperty(humidity, READ, 10 * SECONDS, NULL);
+  ArduinoCloud.addProperty(humidity, READ, 10 * SECONDS, NULL);
   ArduinoCloud.addProperty(temperature, READ, 10 * SECONDS, NULL);
   ArduinoCloud.addProperty(waterFlow, READ, 1 * SECONDS, NULL);
   ArduinoCloud.addProperty(soilMoisture, READ, 10 * SECONDS, NULL);
