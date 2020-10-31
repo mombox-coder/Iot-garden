@@ -1,0 +1,109 @@
+import time
+import datetime
+from firebase import firebase
+import grovepi
+
+watered = False
+
+def automate():
+   
+    waterthresh = 30
+    lightthresh = 50
+    resthresh = 0
+    fanthresh = 10
+    moisture = grovepi.analogRead(moisture_sensor)
+    moisture = 100 - (100*moisture/1023)
+    light = grovepi.analogRead(light_sensor) 
+    light = 100*light/1023
+    [temp,humidity] = grovepi.dht(dht_sensor, 0)
+    
+    if (moisture > waterthresh):
+        grovepi.digitalWrite(motor, 0)
+    if (moisture =< waterthresh):
+        grovepi.digitalWrite(motor, 1)
+        
+    if (light > lightthresh) :
+      grovepi.digitalWrite(lamp, 0)
+    if (light =< lightthresh) :
+      grovepi.digitalWrite(lamp, 1)
+      
+    if (temp < resthresh) :
+      grovepi.digitalWrite(resistance, 1)
+      grovepi.digitalWrite(fan, 0)
+    if (temp >= resthresh) and (temp =< fanthresh) :
+      grovepi.digitalWrite(resistance, 0)
+      grovepi.digitalWrite(fan, 0)
+    if (temp > fanthresh) :
+      grovepi.digitalWrite(resistance, 0)
+      grovepi.digitalWrite(fan, 1)
+      
+    sleep(1)
+      
+    
+
+dht_sensor = 4
+light_sensor = 0
+moisture_sensor = 1
+motor = 3
+lamp = 5
+resistance = 6
+fan = 7
+
+grovepi.pinMode(resistance, "OUTPUT")
+grovepi.pinMode(lamp, "OUTPUT")
+grovepi.pinMode(motor, "OUTPUT")
+grovepi.pinMode(dht_sensor, "INPUT")
+grovepi.pinMode(light_sensor, "INPUT")
+grovepi.pinMode(moisture_sensor, "INPUT")
+grovepi.pinMode(fan, "OUTPUT")
+
+firebase = firebase.FirebaseApplication('paste URL here', None)
+
+initTime = time.time()
+
+while True:
+    
+    
+    motor_state = firebase.get('/iot-garden-monitoring-system', 'motor_state')
+    update = firebase.get('/iot-garden-monitoring-system', 'update')
+    pi_state = firebase.get('/iot-garden-monitoring-system', 'pi_state')
+
+    print "received data in ", int(time.time() - initTime), "seconds"
+    initTime = time.time()
+
+    if (pi_state == unicode("0")):
+        grovepi.digitalWrite(motor,0)
+        break
+    [temp,humidity] = grovepi.dht(dht_sensor, 0)
+    light = grovepi.analogRead(light_sensor)
+    moisture = grovepi.analogRead(moisture_sensor)
+
+    light = 100*light/1023
+    moisture = 100 - (100*moisture/1023)
+
+    print "temp = ", temp
+    print "humidity = ", humidity
+    print "light = ", light
+    print "moisture = ", moisture
+
+
+    if (update == unicode("1")):
+        print "updating db"
+        firebase.put('iot-garden-monitoring-system', 'temperature', str(temp))
+        firebase.put('iot-garden-monitoring-system', 'humidity', str(humidity))
+        firebase.put('iot-garden-monitoring-system', 'light', str(light))
+        firebase.put('iot-garden-monitoring-system', 'moisture', str(moisture))
+        firebase.put('iot-garden-monitoring-system', 'update', str(0))
+        
+    if (motor_state == unicode("1")):
+        #turn on motor
+        print "motor turned on"
+        grovepi.digitalWrite(motor,1)
+    elif (motor_state == unicode("2")):
+        #automate
+        print "motor automatic control"
+        automate()
+    else:
+        #turn off motor
+        print "motor turned off"
+        grovepi.digitalWrite(motor,0)
