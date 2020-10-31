@@ -3,44 +3,6 @@ import datetime
 from firebase import firebase
 import grovepi
 
-watered = False
-
-def automate():
-   
-    waterthresh = 30
-    lightthresh = 50
-    resthresh = 0
-    fanthresh = 10
-    moisture = grovepi.analogRead(moisture_sensor)
-    moisture = 100 - (100*moisture/1023)
-    light = grovepi.analogRead(light_sensor) 
-    light = 100*light/1023
-    [temp,humidity] = grovepi.dht(dht_sensor, 0)
-    
-    if (moisture > waterthresh):
-        grovepi.digitalWrite(motor, 0)
-    if (moisture =< waterthresh):
-        grovepi.digitalWrite(motor, 1)
-        
-    if (light > lightthresh) :
-      grovepi.digitalWrite(lamp, 0)
-    if (light =< lightthresh) :
-      grovepi.digitalWrite(lamp, 1)
-      
-    if (temp < resthresh) :
-      grovepi.digitalWrite(resistance, 1)
-      grovepi.digitalWrite(fan, 0)
-    if (temp >= resthresh) and (temp =< fanthresh) :
-      grovepi.digitalWrite(resistance, 0)
-      grovepi.digitalWrite(fan, 0)
-    if (temp > fanthresh) :
-      grovepi.digitalWrite(resistance, 0)
-      grovepi.digitalWrite(fan, 1)
-      
-    sleep(1)
-      
-    
-
 dht_sensor = 4
 light_sensor = 0
 moisture_sensor = 1
@@ -56,6 +18,44 @@ grovepi.pinMode(dht_sensor, "INPUT")
 grovepi.pinMode(light_sensor, "INPUT")
 grovepi.pinMode(moisture_sensor, "INPUT")
 grovepi.pinMode(fan, "OUTPUT")
+
+def automate():
+   
+   waterthresh = 30
+   lightthresh = 50
+   resthresh = 0
+   fanthresh = 10
+   
+   While True :
+      moisture = grovepi.analogRead(moisture_sensor)
+      moisture = 100 - (100*moisture/1023)
+      light = grovepi.analogRead(light_sensor) 
+      light = 100*light/1023
+      [temp,humidity] = grovepi.dht(dht_sensor, 0)
+    
+      if (moisture > waterthresh):
+         grovepi.digitalWrite(motor, 0)
+      if (moisture =< waterthresh):
+         grovepi.digitalWrite(motor, 1)
+        
+      if (light > lightthresh) :
+         grovepi.digitalWrite(lamp, 0)
+      if (light =< lightthresh) :
+         grovepi.digitalWrite(lamp, 1)
+      
+      if (temp < resthresh) :
+         grovepi.digitalWrite(resistance, 1)
+         grovepi.digitalWrite(fan, 0)
+      if (temp >= resthresh) and (temp =< fanthresh) :
+         grovepi.digitalWrite(resistance, 0)
+         grovepi.digitalWrite(fan, 0)
+      if (temp > fanthresh) :
+         grovepi.digitalWrite(resistance, 0)
+         grovepi.digitalWrite(fan, 1)
+      
+      sleep(1)
+   
+   
 
 firebase = firebase.FirebaseApplication('paste URL here', None)
 
@@ -101,7 +101,7 @@ while True:
         grovepi.digitalWrite(motor,1)
     elif (motor_state == unicode("2")):
         #automate
-        print "motor automatic control"
+        print "automatic control"
         automate()
     else:
         #turn off motor
