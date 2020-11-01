@@ -97,6 +97,9 @@ while True:
 
     if (pi_state == unicode("0")):
         grovepi.digitalWrite(motor,0)
+        grovepi.digitalWrite(lamp,0)
+        grovepi.digitalWrite(resistance,0)
+        grovepi.digitalWrite(fan,0)
         break
     [temp,humidity] = grovepi.dht(dht_sensor, 0)
     light = grovepi.analogRead(light_sensor)
