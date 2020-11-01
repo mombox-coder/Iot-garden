@@ -19,40 +19,61 @@ grovepi.pinMode(light_sensor, "INPUT")
 grovepi.pinMode(moisture_sensor, "INPUT")
 grovepi.pinMode(fan, "OUTPUT")
 
-def waterautomate():
-    moisture = grovepi.analogRead(moisture_sensor)
-    moisture = 100 - (100*moisture/1023)
+def waterauto():
     waterthresh = 30
-    if (moisture > waterthresh):
-        grovepi.digitalWrite(motor, 0)
-    else : 
-        grovepi.digitalWrite(motor, 1)
-    sleep(1)
+    watered= False
+    if not watered :
+        while True :
+            moisture = grovepi.analogRead(moisture_sensor)
+            moisture = 100 - (100*moisture/1023)
+            if (moisture > waterthresh):
+                grovepi.digitalWrite(motor, 0)
+                watered = True
+                break
+            else:
+                grovepi.digitalWrite(motor,1)
 
-def lightautomate():        
+def lightauto():        
     lightthresh = 50
-    light = grovepi.analogRead(light_sensor) 
-    light = 100*light/1023
-    if (light > lightthresh) :
-      grovepi.digitalWrite(lamp, 0)
-    else :
-      grovepi.digitalWrite(lamp, 1)
-    sleep(1)
+    lighted= False
+    if not lighted :
+        While True :
+            light = grovepi.analogRead(light_sensor) 
+            light = 100*light/1023
+            if (light > lightthresh) :
+                grovepi.digitalWrite(lamp, 0)
+                lighted = True
+                break
+            else:
+                grovepi.digitalWrite(lamp, 1)
     
-def tempautomate():
+    
+def resistenceauto():
     resthresh = 0
-    fanthresh = 10     
-    if (temp < resthresh) :
-      grovepi.digitalWrite(resistance, 1)
-      grovepi.digitalWrite(fan, 0)
-    elif (temp =< fanthresh) :
-      grovepi.digitalWrite(resistance, 0)
-      grovepi.digitalWrite(fan, 0)
-    else :
-      grovepi.digitalWrite(resistance, 0)
-      grovepi.digitalWrite(fan, 1)
-    sleep(1)
-      
+    heated= False 
+    if not heated :
+        while True :
+            [temp,humidity] = grovepi.dht(dht_sensor, 0)
+            if (temp > resthresh) :
+                grovepi.digitalWrite(resistance, 0)
+                heated = True
+                break
+            else : 
+                grovepi.digitalWrite(resistance, 1)
+               
+               
+def fanauto():
+    fanthresh = 10  
+    refreshed= False
+    if not refreshed :
+        while True :
+            [temp,humidity] = grovepi.dht(dht_sensor, 0)
+            if (temp < fanthresh) :
+                grovepi.digitalWrite(fan, 0)
+                refreshed = True
+                break
+            else :    
+                grovepi.digitalWrite(fan, 1)
     
 
 
@@ -97,16 +118,59 @@ while True:
         firebase.put('iot-garden-monitoring-system', 'light', str(light))
         firebase.put('iot-garden-monitoring-system', 'moisture', str(moisture))
         firebase.put('iot-garden-monitoring-system', 'update', str(0))
-        
-    if (motor_state == unicode("1")):
-        #turn on motor
-        print "motor turned on"
-        grovepi.digitalWrite(motor,1)
-    if (motor_state == unicode("2")):
-        #automate
-        print "motor automatic control"
-        waterautomate()
-    else:
-        #turn off motor
-        print "motor turned off"
-        grovepi.digitalWrite(motor,0)
+    
+    def motor_automate():
+        if (motor_state == unicode("1")):
+            #turn on motor
+            print "motor turned on"
+            grovepi.digitalWrite(motor,1)
+        if (motor_state == unicode("2")):
+            #auto
+            print "motor automatic control"
+            waterauto()
+        else:
+            #turn off motor
+            print "motor turned off"
+            grovepi.digitalWrite(motor,0)
+            
+    def lamp_automate():
+        if (lamp_state == unicode("1")):
+            #switch on lamp
+            print "lamp switched on"
+            grovepi.digitalWrite(lamp,1)
+        if (lamp_state == unicode("2")):
+            #auto
+            print "lamp automatic control"
+            lightauto()
+        else:
+            #switch off lamp
+            print "lamp switched off"
+            grovepi.digitalWrite(lamp,0)
+    
+    def resistance_automate():
+        if (resistance_state == unicode("1")):
+            #turn on resistance
+            print "resistance turned on"
+            grovepi.digitalWrite(resistance,1)
+        if (resistance_state == unicode("2")):
+            #auto
+            print "resistance automatic control"
+            resistanceauto()
+        else:
+            #turn off resistance
+            print "resistance turned off"
+            grovepi.digitalWrite(resistance,0)
+            
+    def fan_automate():
+        if (fan_state == unicode("1")):
+            #turn on fan
+            print "fan turned on"
+            grovepi.digitalWrite(fan,1)
+        if (fan_state == unicode("2")):
+            #auto
+            print "fan automatic control"
+            fanauto()
+        else:
+            #turn off fan
+            print "fan turned off"
+            grovepi.digitalWrite(fan,0)        
