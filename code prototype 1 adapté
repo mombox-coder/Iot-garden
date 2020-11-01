@@ -24,7 +24,7 @@ def motor_automate():
             #turn on motor
             print "motor turned on"
             grovepi.digitalWrite(motor,1)
-        if (motor_state == unicode("2")):
+        elif (motor_state == unicode("2")):
             #auto
             print "motor automatic control"
             waterthresh = 30
@@ -49,7 +49,7 @@ def lamp_automate():
             #switch on lamp
             print "lamp switched on"
             grovepi.digitalWrite(lamp,1)
-        if (lamp_state == unicode("2")):
+        elif (lamp_state == unicode("2")):
             #auto
             print "lamp automatic control"
             lightthresh = 50
@@ -74,7 +74,7 @@ def resistance_automate():
             #turn on resistance
             print "resistance turned on"
             grovepi.digitalWrite(resistance,1)
-        if (resistance_state == unicode("2")):
+        elif (resistance_state == unicode("2")):
             #auto
             print "resistance automatic control"
             resthresh = 0
@@ -98,7 +98,7 @@ def fan_automate():
             #turn on fan
             print "fan turned on"
             grovepi.digitalWrite(fan,1)
-        if (fan_state == unicode("2")):
+        elif (fan_state == unicode("2")):
             #auto
             print "fan automatic control"
             fanthresh = 10  
